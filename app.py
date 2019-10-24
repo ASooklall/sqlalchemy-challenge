@@ -59,14 +59,22 @@ def precip():
         prcp_dict["date"] = date
         prcp_dict["prcp"] = prcp
         all_prc.append(prcp_dict)
-
 #   * Return the JSON representation of your dictionary.
     return jsonify(all_prc)
 
+
+
 @app.route("/api/v1.0/stations")
 def stations():
-    return("fred")
 #   * Return a JSON list of stations from the dataset.
+    session = Session(engine)
+    results = session.query(Station.name).distinct().all()
+    session.close()
+    station_list = []
+    for station in results:
+        station_list.append(station)
+
+    return jsonify(station_list)
 
 @app.route("/api/v1.0/tobs")
 def tobs_obs():
