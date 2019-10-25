@@ -41,8 +41,9 @@ def welcome():
         f"/api/v1.0/precipitation<br/>"
         f"/api/v1.0/stations<br/>"
         f"/api/v1.0/tobs<br/>"
-        f"/api/v1.0/<start><br/>"
-        f"/api/v1.0/<start>/<end>"
+        f"/api/v1.0/start<br/>"
+        f"/api/v1.0/start/end<br/><br/>"
+        f"When inputting start or end dates, format it as YYYY-MM-DD where Y is year, M is month, and D is day."
     )
 
 
@@ -97,17 +98,21 @@ def tobs_obs():
     return jsonify(prc_results)
 
 @app.route("/api/v1.0/<start>")
-def start_only():
-    return("fred")
+def start_only(start):
 #   * Return a JSON list of the minimum temperature, the average temperature, and the max temperature for a given start or start-end range.
-
 #   * When given the start only, calculate `TMIN`, `TAVG`, and `TMAX` for all dates greater than and equal to the start date.
+    s_only = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
+        filter(Measurement.date >= start).all()
+    return jsonify(s_only)
 
 @app.route("/api/v1.0/<start>/<end>")
-def start_end():
-        return("fred")
-#   * Return a JSON list of the minimum temperature, the average temperature, and the max temperature for a given start or start-end range.
-#   * When given the start and the end date, calculate the `TMIN`, `TAVG`, and `TMAX` for dates between the start and end date inclusive.
+def start_end(start, end):
+    #   * Return a JSON list of the minimum temperature, the average temperature, and the max temperature for a given start or start-end range.
+    #   * When given the start and the end date, calculate the `TMIN`, `TAVG`, and `TMAX` for dates between the start and end date inclusive.
+    s_e = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
+        filter(Measurement.date >= start).filter(Measurement.date <= end).all()
+    return jsonify(s_e)
+
 
 
 if __name__ == "__main__":
