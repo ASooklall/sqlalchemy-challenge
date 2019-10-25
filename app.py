@@ -99,28 +99,25 @@ def tobs_obs():
 
 @app.route("/api/v1.0/<start>")
 def start_only(start):
+    session = Session(engine)
 #   * Return a JSON list of the minimum temperature, the average temperature, and the max temperature for a given start or start-end range.
 #   * When given the start only, calculate `TMIN`, `TAVG`, and `TMAX` for all dates greater than and equal to the start date.
     s_only = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
         filter(Measurement.date >= start).all()
+    session.close() 
     return jsonify(s_only)
 
 @app.route("/api/v1.0/<start>/<end>")
 def start_end(start, end):
+    session = Session(engine)
     #   * Return a JSON list of the minimum temperature, the average temperature, and the max temperature for a given start or start-end range.
     #   * When given the start and the end date, calculate the `TMIN`, `TAVG`, and `TMAX` for dates between the start and end date inclusive.
     s_e = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
         filter(Measurement.date >= start).filter(Measurement.date <= end).all()
+    session.close()
     return jsonify(s_e)
 
 
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-
-# ## Hints
-
-# * You will need to join the station and measurement tables for some of the analysis queries.
-
-# * Use Flask `jsonify` to convert your API data into a valid JSON response object.
