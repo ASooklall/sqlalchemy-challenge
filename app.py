@@ -4,6 +4,8 @@ import sqlalchemy
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, func
+import datetime as dt
+from datetime import datetime
 
 from flask import Flask, jsonify
 
@@ -51,7 +53,6 @@ def precip():
     session = Session(engine)
     results = session.query(Measurement.date, Measurement.prcp).all()
     session.close()
-    prc_1 = list(np.ravel(results))
 #   * Convert the query results to a Dictionary using `date` as the key and `prcp` as the value.
     all_prc = []
     for date, prcp in results:
@@ -78,9 +79,22 @@ def stations():
 
 @app.route("/api/v1.0/tobs")
 def tobs_obs():
-        return("fred")
 #   * query for the dates and temperature observations from a year from the last data point.
+    session = Session(engine)
+    lastdate = session.query(Measurement.date).order_by(Measurement.date.desc()).first()
+
+    #convert last date into datetime
+    ldt = datetime.strptime(str(lastdate[0]), "%Y-%m-%d")
+
+    # substract one year from last
+    query_date = ldt - dt.timedelta(days=365)
+
+    # Perform a query to retrieve the data and precipitation scores
+    prc_results = session.query(Measurement.date, Measurement.tobs).filter(Measurement.date > query_date).all()
+    session.close()
+
 #   * Return a JSON list of Temperature Observations (tobs) for the previous year.
+    return jsonify(prc_results)
 
 @app.route("/api/v1.0/<start>")
 def start_only():
